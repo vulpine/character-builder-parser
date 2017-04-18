@@ -1,26 +1,40 @@
 #!/usr/bin/ruby
 
 require 'nokogiri'
+require 'optparse'
 
 def get_file_xml(filename)
   xml = File.open(filename, 'rb') { |f| Nokogiri::XML(f) }
   xml
 end
 
-def get_race_names(xml)
-  races = []
+def get_types(xml, type)
+  types = []
   xml.xpath('//RulesElement').each do |ruleselement|
-    if ruleselement.attr('type') == "Race"
-      races << ruleselement.attr('name')
+    if ruleselement.attr('type') == type.capitalize
+      types << ruleselement.attr('name')
     end
   end
-  races
+  types
 end
 
-# Fix this eventually, but for now just grab the first argument.
-filename = ARGV[0]
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
 
-xml = get_file_xml(filename)
+  opts.on("-i", "--input-file FILENAME", "File to read data from.") do |i|
+    options[:input_file] = i
+  end
 
-races = get_race_names(xml)
-puts races.join(', ')
+  opts.on("-l", "--list TYPE", "List all TYPEs in the input file.") do |l|
+    options[:list] = l
+  end
+end.parse!
+
+
+xml = get_file_xml(options[:input_file])
+
+if options[:list]
+  types = get_types(xml, options[:list])
+  puts types.join(', ')
+end
