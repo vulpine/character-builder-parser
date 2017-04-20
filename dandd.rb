@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require_relative 'internal_ids'
+
 require 'nokogiri'
 require 'optparse'
 
